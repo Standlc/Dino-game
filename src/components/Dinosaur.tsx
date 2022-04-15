@@ -74,6 +74,20 @@ const Dinosaur = ({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [spaceBarDown, acceleration]);
 
+  useEffect(()=>{
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  },[spaceBarDown, gameOver]);
+
+  const handleClick = () => {
+    if(gameOver) return;
+
+    setSpaceBarDown(true);
+    if (spaceBarDown) {
+      setSecondJump(true);
+    }
+  }
+
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === " " && spaceBarDown) {
       setSecondJump(true);
