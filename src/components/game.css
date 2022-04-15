@@ -1,0 +1,68 @@
+* {
+  margin: 0;
+}
+.canvas {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: center;
+  overflow: hidden;
+  background-color: rgb(31, 31, 31);
+}
+
+.menu-container {
+  padding: 20px 30px;
+  border-radius: 5px;
+  border: 1px solid white;
+  color: white;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9;
+}
+.menu-title {
+}
+.menu-items-wrapper {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.menu-play-button {
+  padding: 10px 20px;
+  border: 1px solid white;
+  border-radius: 5px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.dinosaur-wrapper {
+  position: absolute;
+  height: 100px;
+  width: 70px;
+  background-color: black;
+  overflow: hidden;
+  bottom: 0;
+}
+.dinosaur-image {
+  height: 100%;
+  width: 100%;
+}
+
+.object-wrapper {
+  position: absolute;
+  height: 80px;
+  background-color: gray;
+  right: 0;
+  bottom: 0;
+  /* overflow: hidden; */
+}
+.object-image {
+  height: 100%;
+  object-fit: cover;
+}
