@@ -3,6 +3,7 @@ import Objects, { ObjectData } from "./components/Objects";
 import "./components/game.css";
 import React, { createContext, useEffect, useRef, useState } from "react";
 import Menu from "./components/Menu";
+import Mushroom from "./components/Mushroom";
 
 function App() {
   const dinosaurRef = useRef<HTMLDivElement | null>(null);
@@ -11,15 +12,16 @@ function App() {
   const [gameOver, setGameOver] = useState(false);
   const [objects, setObjects] = useState(INITIAL_OBJECTS());
   const [score, setScore] = useState(0);
+  const [superPowers, setSuperPowers] = useState(false);
+  const [showMushroom, setShowMushroom] = useState(false);
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === " ") setSpaceBarDown(true);
-  };
+    if (showMushroom || superPowers) return;
+    const timeOut = setTimeout(() => {
+      setShowMushroom(true);
+    }, 5000);
+    return () => clearTimeout(timeOut);
+  }, [showMushroom, superPowers]);
 
   return (
     <GameStatusContext.Provider
@@ -31,16 +33,16 @@ function App() {
         setStartGame,
         score,
         setScore,
+        superPowers,
+        setSuperPowers,
       }}
     >
       <ObjectsContext.Provider value={{ objects, setObjects }}>
         <div className="canvas">
           <Menu />
-          <Dinosaur
-            spaceBarDown={spaceBarDown}
-            setSpaceBarDown={setSpaceBarDown}
-          />
+          <Dinosaur />
           <Objects />
+          {showMushroom && <Mushroom setShowMushroom={setShowMushroom} />}
         </div>
       </ObjectsContext.Provider>
     </GameStatusContext.Provider>
@@ -76,6 +78,8 @@ type GameStatusType = {
   dinosaurRef: React.MutableRefObject<HTMLDivElement | null>;
   score: number;
   setScore: React.Dispatch<React.SetStateAction<number>>;
+  superPowers: boolean;
+  setSuperPowers: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const GameStatusContext = createContext<GameStatusType>(

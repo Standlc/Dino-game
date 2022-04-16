@@ -4,84 +4,108 @@ import { ObjectData } from "./Objects";
 
 const Object = ({ object, index }: { object: ObjectData; index: number }) => {
   const INTERVAL_BETWEEN_OBJECTS = 500;
-  const INITIAL_ACCELERATION = 8;
+  const INITIAL_VELOCITY = 8;
   const ACCELERATION = 0.005;
-  const MAX_ACCELERATION = 20;
-  const [acceleration, setAcceleration] = useState(INITIAL_ACCELERATION);
+  const MAX_VELOCITY = 22;
+  const objectRef = useRef<HTMLDivElement | null>(null);
+  const [velocity, setVelocity] = useState(INITIAL_VELOCITY);
   const [objectRight, setObjectRight] = useState(
     -index * INTERVAL_BETWEEN_OBJECTS
   );
-  const objectRef = useRef<HTMLDivElement | null>(null);
-  const { gameOver, startGame, setGameOver, dinosaurRef, setScore, score } =
-    useContext(GameStatusContext);
-  const [objectHasPassedDino, setObjectHasPassedDino] = useState(false);
+  const {
+    gameOver,
+    startGame,
+    setGameOver,
+    dinosaurRef,
+    setScore,
+    score,
+    superPowers,
+  } = useContext(GameStatusContext);
   const { setObjects, objects } = useContext(ObjectsContext);
+  const objectPassedScreen = objectRight >= window.innerWidth;
+
+  const isDinoTouchingObject = () => {
+    if (superPowers) return;
+    const objectRefCurrent = objectRef.current;
+    const dinosaurRefCurrent = dinosaurRef.current;
+    if (!objectRefCurrent || !dinosaurRefCurrent) return;
+    const dinoClientRect = dinosaurRefCurrent.getBoundingClientRect();
+    const objectClientRect = objectRefCurrent.getBoundingClientRect();
+
+    const dinoRightObjectLeft = dinoClientRect.right <= objectClientRect.left;
+    const dinoBottomObjectTop = dinoClientRect.bottom <= objectClientRect.top;
+    const dinoLeftObjectRight = dinoClientRect.left >= objectClientRect.right;
+
+    return !dinoRightObjectLeft && !dinoBottomObjectTop && !dinoLeftObjectRight;
+  };
+
+  const dinoPassedObject = () => {
+    const objectRefCurrent = objectRef.current;
+    const dinosaurRefCurrent = dinosaurRef.current;
+    if (!objectRefCurrent || !dinosaurRefCurrent) return;
+    return (
+      dinosaurRefCurrent.getBoundingClientRect().left >
+      objectRefCurrent.getBoundingClientRect().right
+    );
+  };
+
+  const stopMoving = !startGame || gameOver || isDinoTouchingObject();
 
   useEffect(() => {
-    if (objectHasPassedDino) setScore(score + 1);
-  }, [objectHasPassedDino]);
-
-  const resetObject = () => {
-    setObjectRight(-index * INTERVAL_BETWEEN_OBJECTS);
-    setAcceleration(INITIAL_ACCELERATION);
-  };
+    if (dinoPassedObject()) setScore(score + 1);
+  }, [dinoPassedObject()]);
 
   useEffect(() => {
     if (!gameOver) resetObject();
   }, [gameOver]);
 
   useEffect(() => {
-    const handleMoveObject = () => {
-      if (gameOver || !startGame) return;
-      setObjectRight(objectRight + acceleration);
-
-      if (acceleration < MAX_ACCELERATION)
-        return setAcceleration(acceleration + ACCELERATION);
-      setAcceleration(MAX_ACCELERATION);
-    };
-
-    const interval = setInterval(handleMoveObject, 1000 / 60);
-    return () => clearInterval(interval);
-  }, [objectRight, gameOver, startGame]);
+    if (isDinoTouchingObject()) setGameOver(true);
+  }, [isDinoTouchingObject()]);
 
   useEffect(() => {
-    const dinosaurRefCurrent = dinosaurRef.current;
-    const objectRefCurrent = objectRef.current;
-    if (!dinosaurRefCurrent || !objectRefCurrent) return;
+    if (stopMoving) return;
+    const jumpInterval = setInterval(() => {
+      move();
+    }, 1000 / 60);
+    return () => clearInterval(jumpInterval);
+  }, [stopMoving, velocity, objectRight]);
 
-    setObjectHasPassedDino(
-      objectRefCurrent.getBoundingClientRect().right <=
-        dinosaurRefCurrent.getBoundingClientRect().left
+  useEffect(() => {
+    if (objectPassedScreen) moveObjectToRight();
+  }, [objectPassedScreen]);
+
+  const move = () => {
+    addStyle(objectRight);
+    setObjectRight(objectRight + velocity);
+    setVelocity(
+      velocity >= MAX_VELOCITY ? MAX_VELOCITY : velocity + ACCELERATION
     );
+  };
 
-    const objectPassedDino =
-      objectRefCurrent.getBoundingClientRect().left <=
-      dinosaurRefCurrent.getBoundingClientRect().right;
-    const objectIsWithinDinoWidth =
-      objectRefCurrent.getBoundingClientRect().right >=
-      dinosaurRefCurrent.getBoundingClientRect().left;
-    const objectIsWithinDinoHeight =
-      objectRefCurrent.getBoundingClientRect().top <=
-      dinosaurRefCurrent.getBoundingClientRect().bottom;
-
-    if (objectPassedDino && objectIsWithinDinoWidth && objectIsWithinDinoHeight)
-      setGameOver(true);
-  }, [dinosaurRef, objectRight]);
-
-  useEffect(() => {
-    if (objectRight >= window.innerWidth) handleObjectPassedScreen();
-  }, [objectRight, objectRef]);
-
-  const handleObjectPassedScreen = () => {
+  const addStyle = (right: number) => {
     const objectRefCurrent = objectRef.current;
     if (!objectRefCurrent) return;
-    setObjectRight(-objectRefCurrent.getBoundingClientRect().width);
-    const objecstCopy = [...objects];
-    const objectCopy = objecstCopy.find((o) => o.heigth === object.heigth);
-    if (objectCopy) {
-      objectCopy.heigth = Math.random() * 45 + 50;
-    }
-    setObjects(objecstCopy);
+    objectRefCurrent.style.right = `${right}px`;
+  };
+
+  const moveObjectToRight = () => {
+    setObjectRight(-(objectRef.current?.clientWidth ?? 0));
+    changeObjectType();
+  };
+
+  const resetObject = () => {
+    addStyle(-index * INTERVAL_BETWEEN_OBJECTS);
+    setObjectRight(-index * INTERVAL_BETWEEN_OBJECTS);
+    setVelocity(INITIAL_VELOCITY);
+  };
+
+  const changeObjectType = () => {
+    const objecsCopy = [...objects];
+    const objectCopy = objecsCopy.find((o) => o === object);
+    if (!objectCopy) return;
+    objectCopy.heigth = Math.random() * 45 + 50;
+    setObjects(objecsCopy);
   };
 
   return (
@@ -90,7 +114,6 @@ const Object = ({ object, index }: { object: ObjectData; index: number }) => {
       className="object-wrapper"
       style={{
         height: `${object.heigth}px`,
-        right: `${objectRight}px`,
       }}
     >
       <img className="object-image" src={object.src} alt="" />

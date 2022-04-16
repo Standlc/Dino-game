@@ -2,126 +2,123 @@ import React, { useContext, useEffect, useState } from "react";
 import { GameStatusContext } from "../App";
 import "./game.css";
 
-const Dinosaur = ({
-  spaceBarDown,
-  setSpaceBarDown,
-}: {
-  spaceBarDown: boolean;
-  setSpaceBarDown: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
+const Dinosaur = () => {
+  const { startGame, gameOver, dinosaurRef, superPowers, setSuperPowers } =
+    useContext(GameStatusContext);
   const elon = require("../assests/elon.png");
+  const elonThug = require("../assests/elonThug.jpeg");
   const GRAVITATIONAL_FORCE = 1.2;
-  const INITIAL_ACCELERATION = 20;
+  const INITIAL_VELOCITY = superPowers ? 27 : 20;
   const [dinosaurBottom, setDinosaurBottom] = useState(0);
   const [backFlipRotation, setBackFlipRotation] = useState(0);
-  const [acceleration, setAcceleration] = useState(INITIAL_ACCELERATION);
-  const dinosaurHasLanded = dinosaurBottom < 0;
+  const BACKFLIP_VELOCITY = 5;
+  const [velocity, setVelocity] = useState(INITIAL_VELOCITY);
+  const [firstJump, setFirstJump] = useState(false);
   const [secondJump, setSecondJump] = useState(false);
-  const { startGame, gameOver, dinosaurRef } = useContext(GameStatusContext);
+  const dinosaurHasLanded = dinosaurBottom <= 0 && velocity <= 0;
+  const stopMoving = !startGame || gameOver || !firstJump;
+  const noBackFlip = stopMoving || !secondJump || !superPowers;
+
+  useEffect(() => {
+    if (!superPowers) return;
+    setTimeout(() => setSuperPowers(false), 5000);
+  }, [superPowers]);
 
   useEffect(() => {
     if (!gameOver) resetJump();
   }, [gameOver]);
 
   useEffect(() => {
-    if (!spaceBarDown || !startGame || gameOver) return;
-    const interval = setInterval(() => {
-      handleJump();
-    }, 1000 / 60);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [firstJump, secondJump]);
 
-    return () => clearInterval(interval);
-  }, [
-    spaceBarDown,
-    dinosaurBottom,
-    acceleration,
-    gameOver,
-    startGame,
-    dinosaurRef,
-  ]);
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [firstJump, secondJump]);
 
-  const handleJump = () => {
+  const handleClick = () => {
+    setFirstJump(true);
+    if (firstJump) setSecondJump(true);
+  };
+
+  useEffect(() => {
     if (dinosaurHasLanded) return resetJump();
-    makeDinoJump();
+    if (stopMoving) return;
+    const jumpInterval = setInterval(() => jump(), 1000 / 60);
+    return () => clearInterval(jumpInterval);
+  }, [dinosaurBottom, velocity, firstJump, dinosaurHasLanded, stopMoving]);
+
+  useEffect(() => {
+    if (secondJump) setVelocity(INITIAL_VELOCITY);
+  }, [secondJump]);
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== " ") return;
+    setFirstJump(true);
+    if (firstJump) setSecondJump(true);
   };
 
-  const makeDinoJump = () => {
-    addStyle(dinosaurBottom);
-    setDinosaurBottom(dinosaurBottom + acceleration);
-    setAcceleration(acceleration - GRAVITATIONAL_FORCE);
+  const resetJump = () => {
+    addJumpStyle(0);
+    setFirstJump(false);
+    setSecondJump(false);
+    setDinosaurBottom(0);
+    setVelocity(INITIAL_VELOCITY);
+    resetBackFlip();
   };
 
-  const addStyle = (bottom: number) => {
+  const jump = () => {
+    addJumpStyle(dinosaurBottom);
+    setDinosaurBottom(dinosaurBottom + velocity);
+    setVelocity(velocity - GRAVITATIONAL_FORCE);
+  };
+
+  const addJumpStyle = (bottom: number) => {
     const dinosaurRefCurrent = dinosaurRef.current;
     if (!dinosaurRefCurrent) return;
     dinosaurRefCurrent.style.bottom = `${bottom}px`;
   };
 
-  const resetJump = () => {
-    addStyle(0);
-    setAcceleration(INITIAL_ACCELERATION);
-    setDinosaurBottom(0);
-    setSpaceBarDown(false);
-    setSecondJump(false);
-    setBackFlipRotation(0);
-
-    const dinosaurRefCurrent = dinosaurRef.current;
-    if (!dinosaurRefCurrent) return;
-    dinosaurRefCurrent.style.transform = "rotate(0deg)";
-  };
-
+  //BACKFLIP
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [spaceBarDown, acceleration]);
-
-  useEffect(()=>{
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
-  },[spaceBarDown, gameOver]);
-
-  const handleClick = () => {
-    if(gameOver) return;
-
-    setSpaceBarDown(true);
-    if (spaceBarDown) {
-      setSecondJump(true);
-    }
-  }
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === " " && spaceBarDown) {
-      setSecondJump(true);
-    }
-  };
-
-  useEffect(() => {
-    if (!secondJump || gameOver) return;
-    const interval = setInterval(() => {
+    if (dinosaurHasLanded) return resetBackFlip();
+    if (noBackFlip) return resetBackFlip();
+    const jumpInterval = setInterval(() => {
       doBackFlip();
     }, 1000 / 300);
-
-    return () => clearInterval(interval);
-  }, [secondJump, backFlipRotation, dinosaurRef]);
-
-  const addBackFlipStyle = () => {
-    const dinoRefCurrent = dinosaurRef.current;
-    if (!dinoRefCurrent) return;
-    if (secondJump)
-      dinoRefCurrent.style.transform = `rotate(${backFlipRotation}deg)`;
-  };
-
-  useEffect(() => {
-    if (secondJump) setAcceleration(INITIAL_ACCELERATION);
-  }, [secondJump]);
+    return () => clearInterval(jumpInterval);
+  }, [dinosaurHasLanded, stopMoving, backFlipRotation, secondJump]);
 
   const doBackFlip = () => {
-    addBackFlipStyle();
-    setBackFlipRotation(backFlipRotation + 5);
+    addBackFlipStyle(backFlipRotation);
+    setBackFlipRotation(backFlipRotation + BACKFLIP_VELOCITY);
+  };
+
+  const resetBackFlip = () => {
+    addBackFlipStyle(0);
+    setBackFlipRotation(0);
+  };
+
+  const addBackFlipStyle = (bottom: number) => {
+    const dinosaurRefCurrent = dinosaurRef.current;
+    if (!dinosaurRefCurrent) return;
+    dinosaurRefCurrent.style.transform = `rotate(${bottom}deg)`;
   };
 
   return (
-    <div ref={dinosaurRef} className="dinosaur-wrapper">
-      <img className="dinosaur-image" src={elon} alt="" />
+    <div
+      ref={dinosaurRef}
+      className={
+        superPowers ? "dinosaur-wrapper super-powers" : "dinosaur-wrapper"
+      }
+    >
+      <img
+        className="dinosaur-image"
+        src={superPowers ? elonThug : elon}
+        alt=""
+      />
     </div>
   );
 };
