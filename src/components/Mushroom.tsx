@@ -7,7 +7,7 @@ const Mushroom = ({
   setShowMushroom: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const mushroom = require("../assests/mushroom.png");
-  const [right, setRight] = useState(0);
+  const [right, setRight] = useState(-50);
   const VELOCITY = 20;
   const mushroomRef = useRef<HTMLDivElement | null>(null);
   const { startGame, gameOver, dinosaurRef, superPowers, setSuperPowers } =

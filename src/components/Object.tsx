@@ -22,21 +22,37 @@ const Object = ({ object, index }: { object: ObjectData; index: number }) => {
     superPowers,
   } = useContext(GameStatusContext);
   const { setObjects, objects } = useContext(ObjectsContext);
-  const objectPassedScreen = objectRight >= window.innerWidth;
+  const objectPassedScreen = objectRight >= window.innerWidth + 50;
+  const FLIP_ROTATION_VELOCITY = 5;
+  const BOTTOM_VELOCITY = 7;
+  const [objectIsFlying, setObjectIsFlying] = useState(false);
+  const [flipRotation, setFlipRotation] = useState(0);
+  const [objectBottom, setObjectBottom] = useState(0);
 
   const isDinoTouchingObject = () => {
-    if (superPowers) return;
     const objectRefCurrent = objectRef.current;
     const dinosaurRefCurrent = dinosaurRef.current;
     if (!objectRefCurrent || !dinosaurRefCurrent) return;
-    const dinoClientRect = dinosaurRefCurrent.getBoundingClientRect();
-    const objectClientRect = objectRefCurrent.getBoundingClientRect();
 
-    const dinoRightObjectLeft = dinoClientRect.right <= objectClientRect.left;
-    const dinoBottomObjectTop = dinoClientRect.bottom <= objectClientRect.top;
-    const dinoLeftObjectRight = dinoClientRect.left >= objectClientRect.right;
+    const dinoRightObjectLeft =
+      dinosaurRefCurrent.getBoundingClientRect().right <=
+      objectRefCurrent.getBoundingClientRect().left;
+    const dinoBottomObjectTop =
+      dinosaurRefCurrent.getBoundingClientRect().bottom <=
+      objectRefCurrent.getBoundingClientRect().top;
+    const dinoLeftObjectRight =
+      dinosaurRefCurrent.getBoundingClientRect().left >=
+      objectRefCurrent.getBoundingClientRect().right;
+    const dinoTopObjectBottom =
+      dinosaurRefCurrent.getBoundingClientRect().top >=
+      objectRefCurrent.getBoundingClientRect().bottom;
 
-    return !dinoRightObjectLeft && !dinoBottomObjectTop && !dinoLeftObjectRight;
+    return (
+      !dinoRightObjectLeft &&
+      !dinoBottomObjectTop &&
+      !dinoLeftObjectRight &&
+      !dinoTopObjectBottom
+    );
   };
 
   const dinoPassedObject = () => {
@@ -49,19 +65,31 @@ const Object = ({ object, index }: { object: ObjectData; index: number }) => {
     );
   };
 
-  const stopMoving = !startGame || gameOver || isDinoTouchingObject();
+  const stopMoving =
+    !startGame || gameOver || (isDinoTouchingObject() && !superPowers);
 
   useEffect(() => {
     if (dinoPassedObject()) setScore(score + 1);
   }, [dinoPassedObject()]);
 
   useEffect(() => {
-    if (!gameOver) resetObject();
+    if (!gameOver) return resetObject();
   }, [gameOver]);
 
   useEffect(() => {
-    if (isDinoTouchingObject()) setGameOver(true);
-  }, [isDinoTouchingObject()]);
+    if (isDinoTouchingObject() && superPowers && !objectIsFlying)
+      return setObjectIsFlying(true);
+    if (isDinoTouchingObject() && !superPowers) setGameOver(true);
+  }, [isDinoTouchingObject(), superPowers, objectIsFlying]);
+
+  useEffect(() => {
+    if (stopMoving) return;
+    if (!objectIsFlying) return;
+    const flipInterval = setInterval(() => {
+      flipObject();
+    }, 1000 / 300);
+    return () => clearInterval(flipInterval);
+  }, [, superPowers, flipRotation, objectIsFlying]);
 
   useEffect(() => {
     if (stopMoving) return;
@@ -83,6 +111,24 @@ const Object = ({ object, index }: { object: ObjectData; index: number }) => {
     );
   };
 
+  const flipObject = () => {
+    addFlipStyle({ rotation: flipRotation, bottom: objectBottom });
+    setFlipRotation(flipRotation + FLIP_ROTATION_VELOCITY);
+    setObjectBottom(objectBottom + BOTTOM_VELOCITY);
+  };
+  const addFlipStyle = ({
+    rotation,
+    bottom,
+  }: {
+    rotation: number;
+    bottom: number;
+  }) => {
+    const objectRefCurrent = objectRef.current;
+    if (!objectRefCurrent) return;
+    objectRefCurrent.style.transform = `rotate(${rotation}deg)`;
+    objectRefCurrent.style.bottom = `${bottom}px`;
+  };
+
   const addStyle = (right: number) => {
     const objectRefCurrent = objectRef.current;
     if (!objectRefCurrent) return;
@@ -92,12 +138,20 @@ const Object = ({ object, index }: { object: ObjectData; index: number }) => {
   const moveObjectToRight = () => {
     setObjectRight(-(objectRef.current?.clientWidth ?? 0));
     changeObjectType();
+    addFlipStyle({ rotation: 0, bottom: 0 });
+    setFlipRotation(0);
+    setObjectBottom(0);
+    setObjectIsFlying(false);
   };
 
   const resetObject = () => {
     addStyle(-index * INTERVAL_BETWEEN_OBJECTS);
     setObjectRight(-index * INTERVAL_BETWEEN_OBJECTS);
     setVelocity(INITIAL_VELOCITY);
+    addFlipStyle({ rotation: 0, bottom: 0 });
+    setFlipRotation(0);
+    setObjectBottom(0);
+    setObjectIsFlying(false);
   };
 
   const changeObjectType = () => {
