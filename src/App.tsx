@@ -54,6 +54,7 @@ export default App;
 export const INITIAL_OBJECTS = () => {
   const mark = require("./assests/mark.png");
   const jeff = require("./assests/jeff.png");
+  const jackMa = require("./assests/jackMa.jpeg");
   return [
     {
       heigth: Math.random() * 45 + 50,
@@ -65,7 +66,7 @@ export const INITIAL_OBJECTS = () => {
     },
     {
       heigth: Math.random() * 45 + 60,
-      src: mark,
+      src: jackMa,
     },
   ];
 };
