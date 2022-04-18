@@ -3,7 +3,7 @@ import { GameStatusContext, ObjectsContext } from "../App";
 import { ObjectData } from "./Objects";
 
 const Object = ({ object, index }: { object: ObjectData; index: number }) => {
-  const INTERVAL_BETWEEN_OBJECTS = 500;
+  const INTERVAL_BETWEEN_OBJECTS = window.innerWidth / 3;
   const INITIAL_VELOCITY = 8;
   const ACCELERATION = 0.005;
   const MAX_VELOCITY = 22;

@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800&display=swap");
+
 * {
   margin: 0;
 }
@@ -10,10 +12,11 @@
   justify-content: center;
   overflow: hidden;
   background-color: rgb(31, 31, 31);
+  font-family: "Montserrat", sans-serif;
 }
 
 .menu-container {
-  padding: 20px 30px;
+  padding: 30px 30px;
   border-radius: 5px;
   border: 1px solid white;
   color: white;
@@ -23,8 +26,10 @@
   align-items: center;
   justify-content: center;
   z-index: 9;
+  background-color: rgb(0, 0, 0, 0.3);
 }
 .menu-title {
+  font-weight: 700;
 }
 .menu-items-wrapper {
   margin-top: 20px;
@@ -33,12 +38,21 @@
   justify-content: center;
   align-items: center;
 }
+.menu-item{
+  font-weight: 300;
+}
 .menu-play-button {
   padding: 10px 20px;
   border: 1px solid white;
   border-radius: 5px;
   margin-top: 20px;
   cursor: pointer;
+  font-weight: 800;
+  font-size: 25px;
+  transition: transform 300ms;
+}
+.menu-play-button:hover {
+  transform: scale(1.1);
 }
 
 .dinosaur-wrapper {
@@ -77,7 +91,7 @@
   position: absolute;
   bottom: 250px;
 }
-.mushroom-image{
+.mushroom-image {
   height: 100%;
   filter: invert(100%) hue-rotate(30deg);
 }

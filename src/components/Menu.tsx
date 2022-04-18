@@ -35,8 +35,14 @@ const Menu = () => {
     <div className="menu-container">
       <h1 className="menu-title">Run Elon, Run</h1>
       <div className="menu-items-wrapper">
-        <h2>Score : {score}</h2>
-        {highestScore > 0 && <h2>Highest score : {highestScore}</h2>}
+        <h2 className="menu-item">
+          Score : <b>{score}</b>
+        </h2>
+        {highestScore > 0 && (
+          <h2 className="menu-item">
+            Highest score : <b>{highestScore}</b>
+          </h2>
+        )}
         <h2 className="menu-play-button" onClick={handleClick}>
           {GAME_TITLE}
         </h2>
