@@ -7,7 +7,6 @@ import Mushroom from "./components/Mushroom";
 
 function App() {
   const dinosaurRef = useRef<HTMLDivElement | null>(null);
-  const [spaceBarDown, setSpaceBarDown] = useState(false);
   const [startGame, setStartGame] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [objects, setObjects] = useState(INITIAL_OBJECTS());

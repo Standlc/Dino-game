@@ -65,7 +65,11 @@ const Mushroom = ({
   }, [gameOver]);
 
   return (
-    <div ref={mushroomRef} className="mushroom-body" style={{ right }}>
+    <div
+      ref={mushroomRef}
+      className={superPowers ? "mushroom-body hidden" : "mushroom-body"}
+      style={{ right }}
+    >
       <img className="mushroom-image" src={mushroom} alt="" />
     </div>
   );
