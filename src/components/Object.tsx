@@ -4,7 +4,7 @@ import { ObjectData } from "./Objects";
 
 const Object = ({ object, index }: { object: ObjectData; index: number }) => {
   const INTERVAL_BETWEEN_OBJECTS = window.innerWidth / 3;
-  const INITIAL_VELOCITY = 12;
+  const INITIAL_VELOCITY = 20;
   const ACCELERATION = 0.002;
   const MAX_VELOCITY = 40;
   const objectRef = useRef<HTMLDivElement | null>(null);
