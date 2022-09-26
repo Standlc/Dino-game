@@ -4,6 +4,7 @@ import "./components/game.css";
 import React, { createContext, useEffect, useRef, useState } from "react";
 import Menu from "./components/Menu";
 import Mushroom from "./components/Mushroom";
+import Floor from "./components/Floor";
 
 function App() {
   const dinosaurRef = useRef<HTMLDivElement | null>(null);
@@ -42,6 +43,7 @@ function App() {
           <Dinosaur />
           <Objects />
           {showMushroom && <Mushroom setShowMushroom={setShowMushroom} />}
+          <Floor />
         </div>
       </ObjectsContext.Provider>
     </GameStatusContext.Provider>

@@ -24,10 +24,11 @@ const Object = ({ object, index }: { object: ObjectData; index: number }) => {
   const { setObjects, objects } = useContext(ObjectsContext);
   const objectPassedScreen = objectRight >= window.innerWidth + 50;
   const FLIP_ROTATION_VELOCITY = 5;
+  const FLOOR_LEVEL = 40;
   const BOTTOM_VELOCITY = 7;
   const [objectIsFlying, setObjectIsFlying] = useState(false);
   const [flipRotation, setFlipRotation] = useState(0);
-  const [objectBottom, setObjectBottom] = useState(0);
+  const [objectBottom, setObjectBottom] = useState(FLOOR_LEVEL);
 
   const isDinoTouchingObject = () => {
     const objectRefCurrent = objectRef.current;
@@ -138,9 +139,9 @@ const Object = ({ object, index }: { object: ObjectData; index: number }) => {
   const moveObjectToRight = () => {
     setObjectRight(-(objectRef.current?.clientWidth ?? 0));
     changeObjectType();
-    addFlipStyle({ rotation: 0, bottom: 0 });
+    addFlipStyle({ rotation: 0, bottom: FLOOR_LEVEL });
     setFlipRotation(0);
-    setObjectBottom(0);
+    setObjectBottom(FLOOR_LEVEL);
     setObjectIsFlying(false);
   };
 
@@ -148,9 +149,9 @@ const Object = ({ object, index }: { object: ObjectData; index: number }) => {
     addStyle(-index * INTERVAL_BETWEEN_OBJECTS);
     setObjectRight(-index * INTERVAL_BETWEEN_OBJECTS);
     setVelocity(INITIAL_VELOCITY);
-    addFlipStyle({ rotation: 0, bottom: 0 });
+    addFlipStyle({ rotation: 0, bottom: FLOOR_LEVEL });
     setFlipRotation(0);
-    setObjectBottom(0);
+    setObjectBottom(FLOOR_LEVEL);
     setObjectIsFlying(false);
   };
 

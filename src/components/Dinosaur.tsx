@@ -7,15 +7,16 @@ const Dinosaur = () => {
     useContext(GameStatusContext);
   const elon = require("../assests/elon.png");
   const elonThug = require("../assests/elonThug.jpeg");
+  const FLOOR_LEVEL = 40;
   const GRAVITATIONAL_FORCE = 1.2;
   const INITIAL_VELOCITY = superPowers ? 27 : 20;
-  const [dinosaurBottom, setDinosaurBottom] = useState(0);
+  const [dinosaurBottom, setDinosaurBottom] = useState(FLOOR_LEVEL);
   const [backFlipRotation, setBackFlipRotation] = useState(0);
   const BACKFLIP_VELOCITY = 5;
   const [velocity, setVelocity] = useState(INITIAL_VELOCITY);
   const [firstJump, setFirstJump] = useState(false);
   const [secondJump, setSecondJump] = useState(false);
-  const dinosaurHasLanded = dinosaurBottom <= 0 && velocity <= 0;
+  const dinosaurHasLanded = dinosaurBottom <= FLOOR_LEVEL && velocity <= 0;
   const stopMoving = !startGame || gameOver || !firstJump;
   const noBackFlip = stopMoving || !secondJump || !superPowers;
 
@@ -34,8 +35,8 @@ const Dinosaur = () => {
   }, [firstJump, secondJump]);
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("pointerdown", handleClick);
+    return () => document.removeEventListener("pointerdown", handleClick);
   }, [firstJump, secondJump]);
 
   const handleClick = () => {
@@ -61,10 +62,10 @@ const Dinosaur = () => {
   };
 
   const resetJump = () => {
-    addJumpStyle(0);
+    addJumpStyle(FLOOR_LEVEL);
     setFirstJump(false);
     setSecondJump(false);
-    setDinosaurBottom(0);
+    setDinosaurBottom(FLOOR_LEVEL);
     setVelocity(INITIAL_VELOCITY);
     resetBackFlip();
   };
