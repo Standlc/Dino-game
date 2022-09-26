@@ -4,9 +4,9 @@ import { ObjectData } from "./Objects";
 
 const Object = ({ object, index }: { object: ObjectData; index: number }) => {
   const INTERVAL_BETWEEN_OBJECTS = window.innerWidth / 3;
-  const INITIAL_VELOCITY = 8;
-  const ACCELERATION = 0.005;
-  const MAX_VELOCITY = 22;
+  const INITIAL_VELOCITY = 10;
+  const ACCELERATION = 0.002;
+  const MAX_VELOCITY = 40;
   const objectRef = useRef<HTMLDivElement | null>(null);
   const [velocity, setVelocity] = useState(INITIAL_VELOCITY);
   const [objectRight, setObjectRight] = useState(
